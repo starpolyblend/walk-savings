@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101f1b">
+<title>걸어서 모은 돈</title>
+<meta name="description" content="걸어서 출퇴근하며 절약한 교통비를 달력에 기록하는 개인용 앱">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0d1714;--panel:#182721;--panel2:#20352c;--line:#30443a;--ink:#f3f6ec;--muted:#a6baa9;--lime:#c8f37b;--lime2:#b8e666;
+  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:radial-gradient(circle at 50% -15%,#2a4933 0,transparent 54%),var(--bg);
+  color:var(--ink);
+  font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.wrap{
+  max-width:640px;
+  margin:0 auto;
+  padding:calc(14px + var(--safe-t)) 12px calc(170px + var(--safe-b));
+}
+header{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--lime);color:#152419;font-size:22px;flex:none}
+.brandText{min-width:0}
+.eyebrow{margin:0;color:var(--muted);font-size:10px;letter-spacing:.1em;line-height:1.1}
+.brand h1{font-size:19px;letter-spacing:-.05em;margin:2px 0 0;white-space:nowrap}
+.todayBtn{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--ink);background:#22362b;font-size:12px;white-space:nowrap}
+.dashboard{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;
+}
+.card{
+  background:linear-gradient(180deg,#22372d,#1a2b24);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px 13px;
+  min-height:86px;
+}
+.card .lab{font-size:12px;color:var(--muted);line-height:1.3;margin-bottom:8px}
+.card .num{font-size:clamp(21px,6vw,28px);font-weight:800;letter-spacing:-.05em;line-height:1.05}
+.card .num small{font-size:13px;font-weight:600;color:#d8e4d5}
+.calendarPanel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:14px 10px 14px;
+}
+.monthRow{display:flex;justify-content:space-between;align-items:center;margin:0 2px 12px}
+.monthRow h2{margin:0;font-size:18px;letter-spacing:-.04em}
+.controls{display:flex;gap:6px}
+.nav{height:34px;width:34px;background:#263b30;border:1px solid var(--line);border-radius:11px;color:var(--ink);font-size:20px}
+.weekdays,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.weekdays{margin-bottom:6px}
+.weekdays div{text-align:center;font-size:11px;color:var(--muted);padding:4px 0}
+.weekdays div:first-child{color:#e79e9e}
+.days button{
+  border:1px solid transparent;min-height:54px;border-radius:12px;background:#22352b;color:var(--ink);
+  padding:5px 1px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;
+}
+.days .empty{background:transparent}
+.days .weekend{background:#1c2a24;color:#8b9b90}
+.days .selected{border:2px solid var(--lime);background:#344b35}
+.days .current .dateNum{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:4px}
+.dateNum{font-size:14px;font-weight:700}
+.dots{display:flex;gap:3px;align-items:center;height:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--lime)}
+.dot.out{background:#526b57}
+.calendarFoot{display:flex;gap:11px;margin:12px 4px 0;color:var(--muted);font-size:11px;flex-wrap:wrap;line-height:1.35}
+.key{display:inline-flex;align-items:center;gap:5px}
+.settings{
+  margin-top:12px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;
+}
+.settingRow{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.settingRow label{font-size:12px;color:var(--muted)}
+.fare{display:flex;align-items:center;gap:6px}
+.fare input{width:86px;background:#1d2d25;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 9px;font-size:14px;text-align:right}
+.fare span{color:var(--muted);font-size:12px}
+.saveBtn{background:#344b38;color:var(--ink);border:1px solid var(--line);padding:8px 11px;border-radius:10px;font-size:12px}
+.footer{margin-top:12px;color:#90a495;text-align:center;font-size:11px;line-height:1.6}
+.editorBar{
+  position:fixed;left:0;right:0;bottom:0;z-index:10;
+  padding:10px 12px calc(10px + var(--safe-b));
+  background:linear-gradient(180deg,rgba(13,23,20,.06),rgba(13,23,20,.88) 18%, rgba(13,23,20,.98));
+  backdrop-filter:blur(10px);
+}
+.editorCard{
+  max-width:640px;margin:0 auto;background:rgba(24,39,33,.98);border:1px solid var(--line);border-radius:22px;
+  padding:12px;
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+}
+.editorTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.editorTitleWrap{min-width:0}
+.editorTitle{font-size:16px;font-weight:800;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.editorSub{font-size:11px;color:var(--muted);margin-top:4px}
+.badge{color:#1b2e21;background:var(--lime);font-size:13px;font-weight:800;padding:8px 11px;border-radius:999px;white-space:nowrap}
+.commutes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.commute{
+  background:#21372c;border:1px solid #395144;padding:13px 8px;border-radius:16px;color:var(--ink);text-align:center;transition:background .15s,border-color .15s;
+}
+.commute .ico{display:block;font-size:21px;margin-bottom:6px}
+.commute .txt{display:block;font-weight:750;font-size:14px;line-height:1.2}
+.commute .hint{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.commute.on{background:var(--lime2);border-color:var(--lime2);color:#1d3023}
+.commute.on .hint{color:#385038}
+.commute:disabled{opacity:.42;cursor:not-allowed}
+.editorNote{font-size:11px;color:var(--muted);line-height:1.45;margin:9px 2px 0}
+.sr{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+@media (min-width:700px){
+  .wrap{padding-left:18px;padding-right:18px}
+  .days button{min-height:60px}
+}
+@media (max-width:390px){
+  .wrap{padding-left:10px;padding-right:10px;padding-bottom:166px}
+  .card{padding:12px 11px;min-height:78px}
+  .card .lab{font-size:11px}
+  .calendarPanel{padding:12px 8px}
+  .days button{min-height:50px}
+  .dateNum{font-size:13px}
+  .editorCard{padding:10px}
+  .editorTitle{font-size:15px}
+  .commute{padding:12px 6px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">🚶</div>
+      <div class="brandText">
+        <p class="eyebrow">MY WALKING SAVINGS</p>
+        <h1>걸어서 모은 돈</h1>
+      </div>
+    </div>
+    <button class="todayBtn" id="goToday">오늘</button>
+  </header>
+
+  <section class="dashboard" aria-label="요약 정보">
+    <div class="card">
+      <div class="lab">이번 달 내가 아낀 교통비</div>
+      <div class="num"><span id="monthSavings">0</span><small> 원</small></div>
+    </div>
+    <div class="card">
+      <div class="lab">올해 누적 절약액</div>
+      <div class="num"><span id="yearSavings">0</span><small> 원</small></div>
+    </div>
+  </section>
+
+  <section class="calendarPanel" aria-label="출퇴근 기록 달력">
+    <div class="monthRow">
+      <h2 id="monthTitle"></h2>
+      <div class="controls">
+        <button class="nav" id="prev" aria-label="이전 달">‹</button>
+        <button class="nav" id="next" aria-label="다음 달">›</button>
+      </div>
+    </div>
+    <div class="weekdays"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+    <div class="days" id="days"></div>
+    <div class="calendarFoot">
+      <span class="key"><span class="dot"></span> 걸어서 이동</span>
+      <span class="key"><span class="dot out"></span> 미기록</span>
+      <span>점 2개 = 출근·퇴근 모두 도보</span>
+    </div>
+  </section>
+
+  <section class="settings">
+    <div class="settingRow">
+      <label for="fareInput">지하철 편도 요금</label>
+      <div class="fare">
+        <input id="fareInput" type="number" min="0" step="50" inputmode="numeric" value="1550">
+        <span>원</span>
+        <button class="saveBtn" id="saveFare">적용</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">기록은 이 브라우저의 기기에만 저장됩니다.<br>회원가입이나 서버 전송은 없습니다.</p>
+  <div class="sr" role="status" aria-live="polite" id="announcer"></div>
+</main>
+
+<section class="editorBar" aria-label="선택 날짜 기록">
+  <div class="editorCard">
+    <div class="editorTop">
+      <div class="editorTitleWrap">
+        <div class="editorTitle" id="selectedTitle"></div>
+        <div class="editorSub" id="selectedSubtitle"></div>
+      </div>
+      <span class="badge" id="daySavings">+0원</span>
+    </div>
+    <div class="commutes">
+      <button class="commute" id="toWork" aria-pressed="false">
+        <span class="ico">🌤️</span>
+        <span class="txt">출근 도보</span>
+        <span class="hint">눌러서 기록</span>
+      </button>
+      <button class="commute" id="fromWork" aria-pressed="false">
+        <span class="ico">🌙</span>
+        <span class="txt">퇴근 도보</span>
+        <span class="hint">눌러서 기록</span>
+      </button>
+    </div>
+    <p class="editorNote" id="editorNote">걸어서 이동한 항목만 누르세요. 다시 누르면 기록이 취소됩니다.</p>
+  </div>
+</section>
+
+<script>
+(()=>{'use strict';
+  const STORE='walk-savings-v2';
+  let data={fare:1550,days:{}};
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORE)||'null');
+    if(saved&&typeof saved==='object'){
+      data.fare=Number.isFinite(+saved.fare)&&+saved.fare>=0?+saved.fare:1550;
+      data.days=saved.days&&typeof saved.days==='object'?saved.days:{};
+    }else{
+      // v1 호환 마이그레이션
+      const old=JSON.parse(localStorage.getItem('walk-savings-v1')||'null');
+      if(old&&typeof old==='object'){
+        data.fare=Number.isFinite(+old.fare)&&+old.fare>=0?+old.fare:1550;
+        data.days=old.days&&typeof old.days==='object'?old.days:{};
+      }
+    }
+  }catch(e){}
+
+  const now=new Date(); now.setHours(12,0,0,0);
+  let viewYear=now.getFullYear(), viewMonth=now.getMonth(), selected='';
+
+  const $=id=>document.getElementById(id);
+  const fmt=n=>Number(n).toLocaleString('ko-KR');
+  const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const dateOf=s=>{const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d,12)};
+  const weekend=s=>[0,6].includes(dateOf(s).getDay());
+  const state=s=>{const v=data.days[s]||{}; return {am:v.am===true, pm:v.pm===true};};
+  const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(data));}catch(e){$('announcer').textContent='저장 공간에 접근할 수 없습니다.';}};
+  const total=(prefix)=>{
+    let trips=0;
+    Object.keys(data.days).forEach(k=>{
+      if(k.startsWith(prefix)){
+        const s=state(k); trips += (+s.am) + (+s.pm);
+      }
+    });
+    return {trips,savings:trips*data.fare};
+  };
+
+  selected ||= key(now);
+
+  function render(){
+    const monthPrefix=`${viewYear}-${String(viewMonth+1).padStart(2,'0')}`;
+    const ms=total(monthPrefix);
+    const ys=total(String(now.getFullYear())+'-');
+    $('monthSavings').textContent=fmt(ms.savings);
+    $('yearSavings').textContent=fmt(ys.savings);
+    $('monthTitle').textContent=`${viewYear}년 ${viewMonth+1}월`;
+
+    const grid=$('days');
+    grid.replaceChildren();
+    const first=new Date(viewYear,viewMonth,1,12).getDay();
+    const last=new Date(viewYear,viewMonth+1,0,12).getDate();
+
+    for(let i=0;i<first;i++){
+      const blank=document.createElement('div');
+      blank.className='empty';
+      grid.append(blank);
+    }
+
+    for(let n=1;n<=last;n++){
+      const d=new Date(viewYear,viewMonth,n,12), k=key(d), s=state(k);
+      const b=document.createElement('button');
+      b.type='button';
+      b.className=[weekend(k)?'weekend':'',k===selected?'selected':'',k===key(now)?'current':''].filter(Boolean).join(' ');
+      b.setAttribute('aria-label',`${viewMonth+1}월 ${n}일, 출근 ${s.am?'도보':'미기록'}, 퇴근 ${s.pm?'도보':'미기록'}`);
+      b.setAttribute('aria-pressed',String(k===selected));
+      b.innerHTML=`<span class="dateNum">${n}</span><span class="dots"><span class="dot ${s.am?'':'out'}"></span><span class="dot ${s.pm?'':'out'}"></span></span>`;
+      b.onclick=()=>{selected=k; render();};
+      grid.append(b);
+    }
+
+    const d=dateOf(selected), s=state(selected), isWeekend=weekend(selected);
+    $('selectedTitle').textContent=`${d.getMonth()+1}월 ${d.getDate()}일 (${['일','월','화','수','목','금','토'][d.getDay()]})`;
+    $('selectedSubtitle').textContent=selected===key(now)?'오늘의 출퇴근 기록':'선택한 날짜의 기록';
+    $('daySavings').textContent=`+${fmt(((+s.am)+(+s.pm))*data.fare)}원`;
+
+    [['toWork','am'],['fromWork','pm']].forEach(([id,part])=>{
+      const b=$(id), on=s[part];
+      b.classList.toggle('on',on);
+      b.setAttribute('aria-pressed',String(on));
+      b.disabled=isWeekend;
+      b.querySelector('.hint').textContent = isWeekend ? '주말은 기록 없음' : (on ? '✓ 걸어서 이동했어요' : '눌러서 기록');
+    });
+
+    $('editorNote').textContent=isWeekend ? '주말은 기록 대상에서 제외했어요. 평일을 선택해 주세요.' : '걸어서 이동한 항목만 누르세요. 다시 누르면 취소됩니다.';
+    $('fareInput').value=data.fare;
+  }
+
+  function toggle(part){
+    if(weekend(selected)) return;
+    const s=state(selected);
+    s[part]=!s[part];
+    if(!s.am && !s.pm) delete data.days[selected];
+    else data.days[selected]=s;
+    save(); render();
+    $('announcer').textContent=`${selected}, ${part==='am'?'출근':'퇴근'} ${s[part]?'도보 기록':'기록 취소'}`;
+  }
+
+  $('toWork').onclick=()=>toggle('am');
+  $('fromWork').onclick=()=>toggle('pm');
+  function move(n){
+    const d=new Date(viewYear,viewMonth+n,1,12);
+    viewYear=d.getFullYear(); viewMonth=d.getMonth();
+    const pick=dateOf(selected);
+    selected=key(new Date(viewYear,viewMonth,Math.min(pick.getDate(),new Date(viewYear,viewMonth+1,0).getDate()),12));
+    render();
+  }
+  $('prev').onclick=()=>move(-1);
+  $('next').onclick=()=>move(1);
+  $('goToday').onclick=()=>{viewYear=now.getFullYear(); viewMonth=now.getMonth(); selected=key(now); render();};
+  $('saveFare').onclick=()=>{
+    const v=+$('fareInput').value;
+    if(!Number.isFinite(v)||v<0){ alert('0원 이상의 올바른 요금을 입력해 주세요.'); return; }
+    data.fare=Math.round(v);
+    save(); render();
+    $('announcer').textContent='편도 요금이 변경되었습니다.';
+  };
+
+  render();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+})();
+</script>
+</body>
+</html>
