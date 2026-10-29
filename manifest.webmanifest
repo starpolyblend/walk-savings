@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "걸어서 모은 돈",
-  "short_name": "도보 절약",
+  "name": "걸어서 절약한 돈",
+  "short_name": "골든스텝",
   "description": "출퇴근 도보 기록과 교통비 절약액",
   "lang": "ko",
   "start_url": "./",
