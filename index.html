@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101f1b">
-<title>걸어서 절약한 돈</title>
-<meta name="description" content="걸어서 출퇴근하며 절약한 교통비를 달력에 기록하는 개인용 앱">
+<title>골든스텝</title>
+<meta name="description" content="도보 출퇴근과 도시락으로 절약한 생활비를 기록하는 앱">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="./icon-192.png">
@@ -79,7 +79,7 @@ header{
 .days .selected{border:2px solid var(--lime);background:#344b35}
 .days .current .dateNum{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:4px}
 .dateNum{font-size:14px;font-weight:700}
-.dots{display:flex;gap:3px;align-items:center;height:10px}
+.dots{display:flex;gap:3px;align-items:center;height:10px}.lunchMark{font-size:10px;line-height:1;margin-left:1px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--lime)}
 .dot.out{background:#526b57}
 .calendarFoot{display:flex;gap:11px;margin:12px 4px 0;color:var(--muted);font-size:11px;flex-wrap:wrap;line-height:1.35}
@@ -108,15 +108,15 @@ header{
 .editorTop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
 .editorTitleWrap{min-width:0}
 .editorTitle{font-size:16px;font-weight:800;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.editorSub{font-size:11px;color:var(--muted);margin-top:4px}
+.editorSub{font-size:10px;color:var(--muted);margin-top:4px}
 .badge{color:#1b2e21;background:var(--lime);font-size:13px;font-weight:800;padding:8px 11px;border-radius:999px;white-space:nowrap}
-.commutes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.commutes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .commute{
-  background:#21372c;border:1px solid #395144;padding:13px 8px;border-radius:16px;color:var(--ink);text-align:center;transition:background .15s,border-color .15s;
+  background:#21372c;border:1px solid #395144;padding:12px 3px;border-radius:14px;color:var(--ink);text-align:center;transition:background .15s,border-color .15s;
 }
 .commute .ico{display:block;font-size:21px;margin-bottom:6px}
-.commute .txt{display:block;font-weight:750;font-size:14px;line-height:1.2}
-.commute .hint{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.commute .txt{display:block;font-weight:750;font-size:12px;line-height:1.2}
+.commute .hint{display:block;font-size:10px;color:var(--muted);margin-top:4px}
 .commute.on{background:var(--lime2);border-color:var(--lime2);color:#1d3023}
 .commute.on .hint{color:#385038}
 .commute:disabled{opacity:.42;cursor:not-allowed}
@@ -135,7 +135,7 @@ header{
   .dateNum{font-size:13px}
   .editorCard{padding:10px}
   .editorTitle{font-size:15px}
-  .commute{padding:12px 6px}
+  .commute{padding:11px 2px}
 }
 </style>
 </head>
@@ -146,7 +146,7 @@ header{
       <div class="logo">🚶</div>
       <div class="brandText">
         <p class="eyebrow">MY WALKING SAVINGS</p>
-        <h1>걸어서 절약한 돈</h1>
+        <h1>골든스텝</h1>
       </div>
     </div>
     <button class="todayBtn" id="goToday">오늘</button>
@@ -154,7 +154,7 @@ header{
 
   <section class="dashboard" aria-label="요약 정보">
     <div class="card">
-      <div class="lab">이번 달 내가 아낀 교통비</div>
+      <div class="lab">이번 달 내가 아낀 생활비</div>
       <div class="num"><span id="monthSavings">0</span><small> 원</small></div>
     </div>
     <div class="card">
@@ -176,7 +176,7 @@ header{
     <div class="calendarFoot">
       <span class="key"><span class="dot"></span> 걸어서 이동</span>
       <span class="key"><span class="dot out"></span> 미기록</span>
-      <span>점 2개 = 출근·퇴근 모두 도보</span>
+      <span>🍱 = 도시락</span>
     </div>
   </section>
 
@@ -215,8 +215,13 @@ header{
         <span class="txt">퇴근 도보</span>
         <span class="hint">눌러서 기록</span>
       </button>
+      <button class="commute" id="lunch" aria-pressed="false">
+        <span class="ico">🍱</span>
+        <span class="txt">점심 도시락</span>
+        <span class="hint">+10,000원</span>
+      </button>
     </div>
-    <p class="editorNote" id="editorNote">걸어서 이동한 항목만 누르세요. 다시 누르면 기록이 취소됩니다.</p>
+    <p class="editorNote" id="editorNote">절약한 항목을 누르세요. 다시 누르면 취소됩니다.</p>
   </div>
 </section>
 
@@ -247,16 +252,16 @@ header{
   const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const dateOf=s=>{const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d,12)};
   const weekend=s=>[0,6].includes(dateOf(s).getDay());
-  const state=s=>{const v=data.days[s]||{}; return {am:v.am===true, pm:v.pm===true};};
+  const state=s=>{const v=data.days[s]||{}; return {am:v.am===true, pm:v.pm===true, lunch:v.lunch===true};};
   const save=()=>{try{localStorage.setItem(STORE,JSON.stringify(data));}catch(e){$('announcer').textContent='저장 공간에 접근할 수 없습니다.';}};
   const total=(prefix)=>{
-    let trips=0;
+    let trips=0, lunches=0;
     Object.keys(data.days).forEach(k=>{
       if(k.startsWith(prefix)){
-        const s=state(k); trips += (+s.am) + (+s.pm);
+        const s=state(k); trips += (+s.am) + (+s.pm); lunches += +s.lunch;
       }
     });
-    return {trips,savings:trips*data.fare};
+    return {trips,lunches,savings:trips*data.fare + lunches*10000};
   };
 
   selected ||= key(now);
@@ -285,27 +290,27 @@ header{
       const b=document.createElement('button');
       b.type='button';
       b.className=[weekend(k)?'weekend':'',k===selected?'selected':'',k===key(now)?'current':''].filter(Boolean).join(' ');
-      b.setAttribute('aria-label',`${viewMonth+1}월 ${n}일, 출근 ${s.am?'도보':'미기록'}, 퇴근 ${s.pm?'도보':'미기록'}`);
+      b.setAttribute('aria-label',`${viewMonth+1}월 ${n}일, 출근 ${s.am?'도보':'미기록'}, 퇴근 ${s.pm?'도보':'미기록'}, 도시락 ${s.lunch?'기록':'미기록'}`);
       b.setAttribute('aria-pressed',String(k===selected));
-      b.innerHTML=`<span class="dateNum">${n}</span><span class="dots"><span class="dot ${s.am?'':'out'}"></span><span class="dot ${s.pm?'':'out'}"></span></span>`;
+      b.innerHTML=`<span class="dateNum">${n}</span><span class="dots"><span class="dot ${s.am?'':'out'}"></span><span class="dot ${s.pm?'':'out'}"></span>${s.lunch?'<span class="lunchMark">🍱</span>':''}</span>`;
       b.onclick=()=>{selected=k; render();};
       grid.append(b);
     }
 
     const d=dateOf(selected), s=state(selected), isWeekend=weekend(selected);
     $('selectedTitle').textContent=`${d.getMonth()+1}월 ${d.getDate()}일 (${['일','월','화','수','목','금','토'][d.getDay()]})`;
-    $('selectedSubtitle').textContent=selected===key(now)?'오늘의 출퇴근 기록':'선택한 날짜의 기록';
-    $('daySavings').textContent=`+${fmt(((+s.am)+(+s.pm))*data.fare)}원`;
+    $('selectedSubtitle').textContent=selected===key(now)?'오늘의 생활비 절약 기록':'선택한 날짜의 절약 기록';
+    $('daySavings').textContent=`+${fmt(((+s.am)+(+s.pm))*data.fare + (+s.lunch)*10000)}원`;
 
-    [['toWork','am'],['fromWork','pm']].forEach(([id,part])=>{
+    [['toWork','am'],['fromWork','pm'],['lunch','lunch']].forEach(([id,part])=>{
       const b=$(id), on=s[part];
       b.classList.toggle('on',on);
       b.setAttribute('aria-pressed',String(on));
       b.disabled=isWeekend;
-      b.querySelector('.hint').textContent = isWeekend ? '주말은 기록 없음' : (on ? '✓ 걸어서 이동했어요' : '눌러서 기록');
+      b.querySelector('.hint').textContent = isWeekend ? '주말 제외' : (on ? '✓ 기록 완료' : (part==='lunch' ? '+10,000원' : '+'+fmt(data.fare)+'원'));
     });
 
-    $('editorNote').textContent=isWeekend ? '주말은 기록 대상에서 제외했어요. 평일을 선택해 주세요.' : '걸어서 이동한 항목만 누르세요. 다시 누르면 취소됩니다.';
+    $('editorNote').textContent=isWeekend ? '주말은 기록 대상에서 제외했어요. 평일을 선택해 주세요.' : '해당 항목을 누르면 절약액이 더해집니다. 다시 누르면 취소됩니다.';
     $('fareInput').value=data.fare;
   }
 
@@ -313,14 +318,15 @@ header{
     if(weekend(selected)) return;
     const s=state(selected);
     s[part]=!s[part];
-    if(!s.am && !s.pm) delete data.days[selected];
+    if(!s.am && !s.pm && !s.lunch) delete data.days[selected];
     else data.days[selected]=s;
     save(); render();
-    $('announcer').textContent=`${selected}, ${part==='am'?'출근':'퇴근'} ${s[part]?'도보 기록':'기록 취소'}`;
+    $('announcer').textContent=`${selected}, ${part==='am'?'출근 도보':part==='pm'?'퇴근 도보':'점심 도시락'} ${s[part]?'기록':'취소'}`;
   }
 
   $('toWork').onclick=()=>toggle('am');
   $('fromWork').onclick=()=>toggle('pm');
+  $('lunch').onclick=()=>toggle('lunch');
   function move(n){
     const d=new Date(viewYear,viewMonth+n,1,12);
     viewYear=d.getFullYear(); viewMonth=d.getMonth();

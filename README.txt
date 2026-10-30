@@ -1,4 +1,6 @@
-걸어서 모은 돈 - PWA 배포 파일
-GitHub 저장소 루트에 index.html, manifest.webmanifest, sw.js, icon-192.png, icon-512.png, .nojekyll 를 업로드하세요.
-GitHub Settings > Pages > Deploy from a branch > main / (root) > Save
-주의: file:// 에서 입력한 기록은 https:// 주소로 자동 이전되지 않습니다. 데이터는 브라우저 저장소에 보관됩니다.
+골든스텝 PWA 업데이트
+
+GitHub walk-savings 저장소의 최상위에 ZIP 내부 파일을 업로드하여 기존 파일을 교체하세요.
+브라우저 저장소 키 walk-savings-v2를 유지하여 기존 도보 기록을 이어받습니다.
+도시락은 평일 1회 10,000원으로 계산합니다.
+기존 설치 앱은 캐시 갱신이 필요할 수 있습니다.

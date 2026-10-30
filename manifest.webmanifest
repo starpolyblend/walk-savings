@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "걸어서 절약한 돈",
+  "name": "골든스텝",
   "short_name": "골든스텝",
-  "description": "출퇴근 도보 기록과 교통비 절약액",
+  "description": "걸어서 이동하고 도시락을 챙기며 아낀 생활비 기록",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
