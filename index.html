@@ -42,7 +42,7 @@ header{
 .brandText{min-width:0}
 .eyebrow{margin:0;color:var(--muted);font-size:10px;letter-spacing:.1em;line-height:1.1}
 .brand h1{font-size:19px;letter-spacing:-.05em;margin:2px 0 0;white-space:nowrap}
-.todayBtn{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--ink);background:#22362b;font-size:12px;white-space:nowrap}
+.headerActions{display:flex;gap:6px;align-items:center}.gearBtn{border:1px solid var(--line);background:#22362b;color:var(--ink);width:36px;height:36px;border-radius:12px;font-size:20px;display:grid;place-items:center}.todayBtn{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--ink);background:#22362b;font-size:12px;white-space:nowrap}
 .dashboard{
   display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;
 }
@@ -93,6 +93,12 @@ header{
 .fare input{width:86px;background:#1d2d25;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 9px;font-size:14px;text-align:right}
 .fare span{color:var(--muted);font-size:12px}
 .saveBtn{background:#344b38;color:var(--ink);border:1px solid var(--line);padding:8px 11px;border-radius:10px;font-size:12px}
+.modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:25;display:flex;align-items:center;justify-content:center;padding:18px}
+.modalBackdrop[hidden]{display:none}
+.modalCard{width:min(100%,410px);background:#1b3027;border:1px solid #49614d;border-radius:22px;padding:20px;box-shadow:0 20px 60px #0008}
+.modalHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.modalHead h2{font-size:19px;margin:0}.closeBtn{background:transparent;color:var(--ink);border:0;font-size:24px;padding:3px 8px}
+.modalField{display:block;margin-bottom:17px}.modalField label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}.modalField input{width:100%;background:#101f1b;border:1px solid #536b57;border-radius:11px;color:var(--ink);padding:13px;font-size:17px}
+.modalNote{font-size:12px;color:var(--muted);line-height:1.5;margin:2px 0 16px}.modalButtons{display:flex;gap:9px}.modalButtons button{flex:1;border-radius:12px;padding:12px;border:1px solid #45604b;background:#2b4335;color:var(--ink)}.modalButtons .primary{background:var(--lime);color:#18281b;font-weight:800;border-color:var(--lime)}
 .footer{margin-top:12px;color:#90a495;text-align:center;font-size:11px;line-height:1.6}
 .editorBar{
   position:fixed;left:0;right:0;bottom:0;z-index:10;
@@ -149,7 +155,7 @@ header{
         <h1>골든스텝</h1>
       </div>
     </div>
-    <button class="todayBtn" id="goToday">오늘</button>
+    <div class="headerActions"><button class="todayBtn" id="goToday">오늘</button><button class="gearBtn" id="openSettings" aria-label="설정 열기" title="설정">⚙</button></div>
   </header>
 
   <section class="dashboard" aria-label="요약 정보">
@@ -180,21 +186,19 @@ header{
     </div>
   </section>
 
-  <section class="settings">
-    <div class="settingRow">
-      <label for="fareInput">지하철 편도 요금</label>
-      <div class="fare">
-        <input id="fareInput" type="number" min="0" step="50" inputmode="numeric" value="1550">
-        <span>원</span>
-        <button class="saveBtn" id="saveFare">적용</button>
-      </div>
-    </div>
-  </section>
-
   <p class="footer">기록은 이 브라우저의 기기에만 저장됩니다.<br>회원가입이나 서버 전송은 없습니다.</p>
   <div class="sr" role="status" aria-live="polite" id="announcer"></div>
 </main>
 
+<div class="modalBackdrop" id="settingsModal" hidden>
+  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modalHead"><h2 id="settingsTitle">⚙ 절약 금액 설정</h2><button class="closeBtn" id="closeSettings" aria-label="설정 닫기">×</button></div>
+    <div class="modalField"><label for="fareInput">지하철 편도 요금 (원)</label><input id="fareInput" type="number" inputmode="numeric" min="0" step="1"></div>
+    <div class="modalField"><label for="lunchFareInput">점심 도시락 절약액 (원)</label><input id="lunchFareInput" type="number" inputmode="numeric" min="0" step="1"></div>
+    <p class="modalNote">설정한 금액은 기존 기록과 새 기록 모두에 적용됩니다.</p>
+    <div class="modalButtons"><button id="cancelSettings">취소</button><button class="primary" id="saveSettings">저장</button></div>
+  </div>
+</div>
 <section class="editorBar" aria-label="선택 날짜 기록">
   <div class="editorCard">
     <div class="editorTop">
@@ -228,11 +232,12 @@ header{
 <script>
 (()=>{'use strict';
   const STORE='walk-savings-v2';
-  let data={fare:1550,days:{}};
+  let data={fare:1550,lunchFare:10000,days:{}};
   try{
     const saved=JSON.parse(localStorage.getItem(STORE)||'null');
     if(saved&&typeof saved==='object'){
       data.fare=Number.isFinite(+saved.fare)&&+saved.fare>=0?+saved.fare:1550;
+      data.lunchFare=Number.isFinite(+saved.lunchFare)&&+saved.lunchFare>=0?+saved.lunchFare:10000;
       data.days=saved.days&&typeof saved.days==='object'?saved.days:{};
     }else{
       // v1 호환 마이그레이션
@@ -261,7 +266,7 @@ header{
         const s=state(k); trips += (+s.am) + (+s.pm); lunches += +s.lunch;
       }
     });
-    return {trips,lunches,savings:trips*data.fare + lunches*10000};
+    return {trips,lunches,savings:trips*data.fare + lunches*data.lunchFare};
   };
 
   selected ||= key(now);
@@ -300,18 +305,18 @@ header{
     const d=dateOf(selected), s=state(selected), isWeekend=weekend(selected);
     $('selectedTitle').textContent=`${d.getMonth()+1}월 ${d.getDate()}일 (${['일','월','화','수','목','금','토'][d.getDay()]})`;
     $('selectedSubtitle').textContent=selected===key(now)?'오늘의 생활비 절약 기록':'선택한 날짜의 절약 기록';
-    $('daySavings').textContent=`+${fmt(((+s.am)+(+s.pm))*data.fare + (+s.lunch)*10000)}원`;
+    $('daySavings').textContent=`+${fmt(((+s.am)+(+s.pm))*data.fare + (+s.lunch)*data.lunchFare)}원`;
 
     [['toWork','am'],['fromWork','pm'],['lunch','lunch']].forEach(([id,part])=>{
       const b=$(id), on=s[part];
       b.classList.toggle('on',on);
       b.setAttribute('aria-pressed',String(on));
       b.disabled=isWeekend;
-      b.querySelector('.hint').textContent = isWeekend ? '주말 제외' : (on ? '✓ 기록 완료' : (part==='lunch' ? '+10,000원' : '+'+fmt(data.fare)+'원'));
+      b.querySelector('.hint').textContent = isWeekend ? '주말 제외' : (on ? '✓ 기록 완료' : (part==='lunch' ? '+'+fmt(data.lunchFare)+'원' : '+'+fmt(data.fare)+'원'));
     });
 
     $('editorNote').textContent=isWeekend ? '주말은 기록 대상에서 제외했어요. 평일을 선택해 주세요.' : '해당 항목을 누르면 절약액이 더해집니다. 다시 누르면 취소됩니다.';
-    $('fareInput').value=data.fare;
+
   }
 
   function toggle(part){
@@ -337,12 +342,20 @@ header{
   $('prev').onclick=()=>move(-1);
   $('next').onclick=()=>move(1);
   $('goToday').onclick=()=>{viewYear=now.getFullYear(); viewMonth=now.getMonth(); selected=key(now); render();};
-  $('saveFare').onclick=()=>{
-    const v=+$('fareInput').value;
-    if(!Number.isFinite(v)||v<0){ alert('0원 이상의 올바른 요금을 입력해 주세요.'); return; }
-    data.fare=Math.round(v);
-    save(); render();
-    $('announcer').textContent='편도 요금이 변경되었습니다.';
+  const modal=$('settingsModal');
+  const closeSettings=()=>{modal.hidden=true;document.body.style.overflow='';$('openSettings').focus();};
+  $('openSettings').onclick=()=>{$('fareInput').value=data.fare;$('lunchFareInput').value=data.lunchFare;modal.hidden=false;document.body.style.overflow='hidden';$('fareInput').focus();};
+  $('closeSettings').onclick=closeSettings;
+  $('cancelSettings').onclick=closeSettings;
+  modal.onclick=e=>{if(e.target===modal)closeSettings();};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeSettings();});
+  $('saveSettings').onclick=()=>{
+    const a=$('fareInput').value.trim(), b=$('lunchFareInput').value.trim();
+    const fare=Number(a), lunch=Number(b);
+    if(a===''||b===''||!Number.isSafeInteger(fare)||!Number.isSafeInteger(lunch)||fare<0||lunch<0){alert('두 금액 모두 0 이상의 정수로 입력해 주세요.');return;}
+    data.fare=fare;data.lunchFare=lunch;
+    save();render();closeSettings();
+    $('announcer').textContent='절약 금액 설정을 저장했습니다.';
   };
 
   render();
