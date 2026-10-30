@@ -98,6 +98,7 @@ header{
 .modalCard{width:min(100%,410px);background:#1b3027;border:1px solid #49614d;border-radius:22px;padding:20px;box-shadow:0 20px 60px #0008}
 .modalHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.modalHead h2{font-size:19px;margin:0}.closeBtn{background:transparent;color:var(--ink);border:0;font-size:24px;padding:3px 8px}
 .modalField{display:block;margin-bottom:17px}.modalField label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}.modalField input{width:100%;background:#101f1b;border:1px solid #536b57;border-radius:11px;color:var(--ink);padding:13px;font-size:17px}
+.appVersion{margin:15px 0 0;padding-top:12px;border-top:1px solid #3a5240;display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px}.appVersion strong{color:var(--lime);font-weight:650}
 .modalNote{font-size:12px;color:var(--muted);line-height:1.5;margin:2px 0 16px}.modalButtons{display:flex;gap:9px}.modalButtons button{flex:1;border-radius:12px;padding:12px;border:1px solid #45604b;background:#2b4335;color:var(--ink)}.modalButtons .primary{background:var(--lime);color:#18281b;font-weight:800;border-color:var(--lime)}
 .footer{margin-top:12px;color:#90a495;text-align:center;font-size:11px;line-height:1.6}
 .editorBar{
@@ -229,6 +230,7 @@ header{
     <div class="modalField"><label for="lunchFareInput">점심 도시락 절약액 (원)</label><input id="lunchFareInput" type="number" inputmode="numeric" min="0" step="1"></div>
     <p class="modalNote">설정한 금액은 기존 기록과 새 기록 모두에 적용됩니다.</p><p class="modalNote">기록은 이 기기의 브라우저 저장소에만 보관되며 서버로 전송하지 않습니다. 앱 데이터 삭제 시 기록이 사라질 수 있습니다.</p>
     <div class="modalButtons"><button id="cancelSettings">취소</button><button class="primary" id="saveSettings">저장</button></div>
+    <div class="appVersion" aria-label="앱 버전"><span>골든스텝 · GOLDEN STEP</span><strong>v0.4.0</strong></div>
   </div>
 </div>
 
